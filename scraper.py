@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 import time
+import csv
 
 def principal():
     options = webdriver.ChromeOptions()
@@ -18,9 +19,14 @@ def principal():
     games = meniu.find_elements(By.CSS_SELECTOR, "tr")
     i=0
     list =[]
+    f=open("games.csv", "w")
+    writer=csv.writer(f)
     for game in games:
         i=i+1
-        list.append(game.get_attribute("data-appid"))
+        writer.writerows(game)
+        #writer.writerows(str(game.get_attribute("data-appid")))
+        #list.append(game.get_attribute("data-appid"))
         #print(game.get_attribute("data-appid"))
     #current_track = track.get_attribute("aria-rowindex")
-    print(list)
+    #print(list)
+    f.close()
