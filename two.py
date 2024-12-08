@@ -1,0 +1,2 @@
+def two():
+    print(two)
