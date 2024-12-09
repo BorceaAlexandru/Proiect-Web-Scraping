@@ -7,6 +7,13 @@ import csv
 import xlwt
 from xlwt import Workbook
 
+#MODIFICARI CLOUDSCRAPER
+import cloudscraper
+from selenium.webdriver.common.by import By
+
+"""
+FUNCTIA INITIALA "PRELUCRARE DATE"
+
 def prelucrareDate(driver, game):
     print(game)
     list = []
@@ -16,6 +23,7 @@ def prelucrareDate(driver, game):
     #time.sleep(1)
 
     #get variables
+    
     gameName = driver.find_element(By.XPATH, '//*[@id="main"]/div/div[1]/div/div[1]/div[1]/h1').get_attribute("innerHTML")
     #time.sleep(1)
     steamDBrating = driver.find_element(By.XPATH, '//*[@id="charts"]/ul[2]/li[2]/strong').get_attribute("innerHTML")[:-1]
@@ -43,8 +51,53 @@ def prelucrareDate(driver, game):
     driver.back()
 
     return list
+"""
 
+def prelucrareDate(driver, game):
+    print(f"Procesare joc: {game}")
+    data_list=[game]
 
+    #scraper
+    scraper=cloudscraper.create_scraper(browser='chrome')
+    url=f"https://steamdb.info/app/{game}/charts/"
+
+    """
+    response = scraper.get(url)
+
+    if response.status_code != 200:
+        print(f"Eroare la pag jocului {game}")
+        return data_list
+
+    #cica asta incarca sursa pag in selenium ??
+    driver.execute_script("document.body.innerHTML = arguments[0];", response.text)
+
+    """
+
+    #try catch
+    try:
+
+        response=scraper.get(url)
+        print(f"Cod status pentru {game}: {response.status_code}")
+
+        if response.status_code != 200:
+            raise Exception("Pagina nu poate fi accesata!")
+
+        driver.execute_script("document.body.innerHTML = arguments[0];", response.text)
+
+        game_name = driver.find_element(By.XPATH, '//*[@id="main"]/div/div[1]/div/div[1]/div[1]/h1').get_attribute("innerHTML")
+        steam_db_rating = driver.find_element(By.XPATH, '//*[@id="charts"]/ul[2]/li[2]/strong').get_attribute("innerHTML")[:-1]
+        positive_reviews = driver.find_element(By.XPATH, '//*[@id="charts"]/ul[2]/li[3]/strong').get_attribute("innerHTML")
+        negative_reviews = driver.find_element(By.XPATH, '//*[@id="charts"]/ul[2]/li[4]/strong').get_attribute("innerHTML")
+        followers = driver.find_element(By.XPATH, '//*[@id="charts"]/div[4]/div[1]/ul/li[1]/strong').get_attribute("innerHTML")
+        peak24 = driver.find_element(By.XPATH, '//*[@id="charts"]/div[4]/div[2]/ul/li[1]/strong').get_attribute("innerHTML")
+        peak_all_time = driver.find_element(By.XPATH, '//*[@id="charts"]/div[4]/div[2]/ul/li[3]/strong').get_attribute("innerHTML")
+
+        data_list.extend([game_name, steam_db_rating, positive_reviews, negative_reviews, followers, peak24, peak_all_time])
+
+    except Exception as e:
+        print(f"Eroare la pag jocului {game}:{e}")
+
+    return data_list
 
 def principal():
     options = webdriver.ChromeOptions()
@@ -64,19 +117,17 @@ def principal():
         gamesID.append(game.get_attribute("data-appid"))
 
     #vreau sa bag datele intr un excel
-    wb=xlwt.Workbook()
-
-    #adaug sheet
-    sheet1 = wb.add_sheet("Sheet1", cell_overwrite_ok=False)
+    #wb=xlwt.Workbook()
+    #sheet1 = wb.add_sheet("Sheet1", cell_overwrite_ok=False)
 
     list_final = []
-    #f=open("games.csv", "w")
-    #writer=csv.writer(f)
-    i=0
+    f=open("games.csv", "w")
+    writer=csv.writer(f)
+    #i=0
     for game in gamesID:
 
         list_final.append(prelucrareDate(driver, game))
-        #writer.writerows(prelucrareDate(driver, game))
+        writer.writerows(prelucrareDate(driver, game))
         """
         list_final.append(prelucrareDate(driver, game))
         sheet1.write(i+1, 1, list_final[i])
@@ -85,4 +136,4 @@ def principal():
 
     print(list_final)
     #wb.save("xlwt GameData.xlsx")
-    #f.close()
+    f.close()
