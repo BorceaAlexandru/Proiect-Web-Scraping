@@ -6,9 +6,10 @@ import time
 import csv
 
 def prelucrareDate(driver, game):
+    print(game)
     list = []
-    list.append(game.get_attribute("data-appid"))   #adaug id joc
-    driver.get("https://steamdb.info/app/" + game.get_attribute("data-appid") + "/charts/") #accesez pag joc
+    list.append(game)   #adaug id joc
+    driver.get("https://steamdb.info/app/" + game + "/charts/") #accesez pag joc
 
     #get variables
     gameName = driver.find_element(By.XPATH, '//*[@id="main"]/div/div[1]/div/div[1]/div[1]/h1').get_attribute("innerHTML")
@@ -26,6 +27,8 @@ def prelucrareDate(driver, game):
     list.append(followers)
     list.append(peak24)
     list.append(peakalltime)
+
+    time.sleep(6)
 
     #driver.back()
 
@@ -46,14 +49,18 @@ def principal():
 
     meniu = driver.find_element(By.XPATH, '//*[@id="DataTables_Table_0"]/tbody')
     games = meniu.find_elements(By.CSS_SELECTOR, "tr")
+    gamesID = []
+    for game in games:
+        gamesID.append(game.get_attribute("data-appid"))
+
 
     list_final = []
-    #f=open("games.csv", "w")
-    #writer=csv.writer(f)
-    for game in games:
-        list_final.append(prelucrareDate(driver, game))
-        #writer.writerows(prelucrareDate(driver, game))
+    f=open("games.csv", "w")
+    writer=csv.writer(f)
+    for game in gamesID:
+        #list_final.append(prelucrareDate(driver, game))
+        writer.writerows(prelucrareDate(driver, game))
 
     print(list_final)
 
-    #f.close()
+    f.close()
