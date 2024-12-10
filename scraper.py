@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 import pandas as pd
 import time
+
 #import csv
 #import xlwt
 #from xlwt import Workbook
@@ -68,66 +69,72 @@ def addToDf(track_info, df):
     else:
         df.loc[len(df)] = track_info
 
+def getPlays(trackID):
+    driver2 = setDriver()
+    driver2.get(trackID)
+    plays = driver2.find_element(By.XPATH, '//*[@id="main"]/div/div[2]/div[4]/div/div[2]/div[2]/div/main/section/div[1]/div[3]/div[3]/div/span[8]')
+    number = int(plays.get_attribute('innerHTML').replace(',', ''))
+    return number
 
 def getTracks(driver, table, df):
     index = 2
     #tot ce am mai jos in while 1
-    try:
-        track = table.find_element(
-            By.XPATH, "./div[@aria-rowindex='" + str(index) + "']"
-        )
-    except:
-        print("\nAll songs have been scanned")
-        #break
-    driver.execute_script("arguments[0].scrollIntoView();", track)
+    while(1):
+        try:
+            track = table.find_element(
+                By.XPATH, "./div[@aria-rowindex='" + str(index) + "']"
+            )
+        except:
+            print("\nAll songs have been scanned")
+            break
+        driver.execute_script("arguments[0].scrollIntoView();", track)
 
-    track_info = []         #columns = ['ID', 'Nume_Cantec', 'Artist', 'NumarAparitii', 'Avalable', 'Plays']
+        track_info = []         #columns = ['ID', 'Nume_Cantec', 'Artist', 'NumarAparitii', 'Avalable', 'Plays']
 
-    #trackID
-    trackID =track.find_element(By.XPATH, './div/div[2]/div/a').get_attribute("href")
-    track_info.append(trackID)
+        #trackID
+        trackID =track.find_element(By.XPATH, './div/div[2]/div/a').get_attribute("href")
+        track_info.append(trackID)
 
-    try:
-        track_data = track.find_element(
-            By.CSS_SELECTOR, 'div > div[aria-colindex="2"] > div '
-        )
-        track_name = track_data.find_element(
-            By.CSS_SELECTOR, "a > div"
-        ).get_attribute("innerHTML")
-        track_artist = track_data.find_elements(
-            By.CSS_SELECTOR, "span.standalone-ellipsis-one-line > div > a"
-        )
-        track_avalability = 1
-    except:
-        track_name = "Unavalable song"
-        track_artist = []
-        track_avalability = 0
+        try:
+            track_data = track.find_element(
+                By.CSS_SELECTOR, 'div > div[aria-colindex="2"] > div '
+            )
+            track_name = track_data.find_element(
+                By.CSS_SELECTOR, "a > div"
+            ).get_attribute("innerHTML")
+            track_artist = track_data.find_elements(
+                By.CSS_SELECTOR, "span.standalone-ellipsis-one-line > div > a"
+            )
+            track_avalability = 1
+        except:
+            track_name = "Unavalable song"
+            track_artist = []
+            track_avalability = 0
 
-    #track name
-    track_info.append(track_name)
+        #track name
+        track_info.append(track_name)
 
-    output_artists = ""
-    for artist in track_artist:
-        output_artists += artist.get_attribute("innerHTML") + ", "
+        output_artists = ""
+        for artist in track_artist:
+            output_artists += artist.get_attribute("innerHTML") + ", "
         
-    if(len(output_artists)): output_artists = output_artists[:-2]
+        if(len(output_artists)): output_artists = output_artists[:-2]
 
-    #track artists
-    track_info.append(str(output_artists))
-    #track numar de aparitii
-    track_info.append(1)
-    #track avalability
-    track_info.append(track_avalability)
-    #track_plays
-    track_info.append("working")
+        #track artists
+        track_info.append(str(output_artists))
+        #track numar de aparitii
+        track_info.append(1)
+        #track avalability
+        track_info.append(track_avalability)
+        #track_plays
+        if(track_avalability):
+            track_info.append(getPlays(trackID))
+        else:
+            track_info.append(0)
 
+        addToDf(track_info, df)
 
-    index = index + 1
-
-    ##add to df
-    addToDf(track_info, df)
-    print(track_info)
-
+        index = index + 1
 
 def scrapePlaylist(driver, playlistName, df):
     #iau fiecare cantec in parte
@@ -138,9 +145,8 @@ def scrapePlaylist(driver, playlistName, df):
     )
     #//*[@id="main"]/div/div[2]/div[4]/div[1]/div[2]/div[2]/div/main/section/div[2]/div[3]/div/div[1]/div[2]/div[2]
     getTracks(driver, table, df)
-    time.sleep(10)
+    time.sleep(5)
 
-    print("im cooked2")
 
 def collectSongs(driver, df, playlistsFound):
 
