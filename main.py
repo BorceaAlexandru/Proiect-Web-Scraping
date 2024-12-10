@@ -10,8 +10,11 @@ if __name__ == "__main__":
     #Get title
     searchText ="car drive vintage"
     playlistsFound = []
-    #playlistsFound.append(searchSpotify(driver, searchText))
-    searchSpotify(driver, searchText)
+
+    #inainte sa schimb 10le static de aici sa fac implementarea pe care am comentat-o in functie in scraper.py
+    playlistsFound.append(searchSpotify(driver, searchText, 10))
+
+    print(playlistsFound)
 """
     principal()
 

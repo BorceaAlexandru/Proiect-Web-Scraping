@@ -19,12 +19,47 @@ def setDriver():
     driver.implicitly_wait(5)
     return driver
 
-def searchSpotify(driver, searchText):
+def searchSpotify(driver, searchText, playlistCounter):
     driver.get("https://open.spotify.com/")
+    time.sleep(1)
     searchBar = driver.find_element(By.XPATH, '//*[@id="global-nav-bar"]/div[2]/div/div/span/div/form/div[2]/input')
     searchBar.send_keys(searchText)
     searchBar.send_keys(Keys.ENTER)
+
+    playlistButton = driver.find_element(By.XPATH, '//*[@id="main"]/div/div[2]/div[4]/div/div[2]/div[2]/div/main/div[1]/div/div/div[1]/div/a[4]/button')
+    playlistButton.click()
+    
+
+    table = driver.find_element(By.XPATH, '//*[@id="searchPage"]/div/div/div/div[1]')
+    playlistIDs = []
+    counter = 1     #will have to find the 1st
+    while(1):
+        print(counter)
+        playlist = table.find_element(
+            By.XPATH, "./span["+str(counter)+"]/div/div/div[2]"
+        )
+
+        playlistID = playlist.get_attribute("id")[28 : -2]
+        currentPlaylist =playlist.get_attribute("id").split("-")[-1]
+
+        driver.execute_script("arguments[0].scrollIntoView();", playlist)
+
+        if(counter != int(currentPlaylist)+1):  
+            print("Greseala undeva")
+            exit(1)
+
+        playlistIDs.append(playlistID)
+        counter = counter + 1
+
+        if(counter >= playlistCounter):
+            print("Gata colectarea")
+            break;   
+    
+    #este nevoie de o implementare pentru atunci cand trec de numarul de span-uri
+    #puse static in html si va trebui sa le incarc dinamic si sa iau numaratoarea de la counterul pe care il am deja
+    #momentan, lucrez cu 10, daca voi mai avea timp mai fac
     time.sleep(10)
+    return playlistIDs
 
 
 
