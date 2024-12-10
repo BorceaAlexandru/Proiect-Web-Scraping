@@ -1,14 +1,31 @@
 import pandas as pd
-from scraper import principal
-import xlwt
-from xlwt import Workbook
+from scraper import *
 
-principal()
 
+
+
+if __name__ == "__main__":
+
+    driver = setDriver()
+    #Get title
+    searchText ="car drive vintage"
+    playlistsFound = []
+    #playlistsFound.append(searchSpotify(driver, searchText))
+    searchSpotify(driver, searchText)
 """
-#vreau sa testez xlwt
-wb=xlwt.Workbook()
-sheet1=wb.add_sheet("sheet1", cell_overwrite_ok=False)
-sheet1.write(1,1, "ceva text")
-wb.save("test.xlsx")
+    principal()
+
+    print("Link to playlist: ")
+    link = input()
+    driver.get(link)
+
+    resetCSV()
+
+    table = setTable(driver)
+    getTracks(table)
+
+    writeTxtFile(driver, link)
+
+    driver.quit()
+    exit(1)
 """

@@ -2,16 +2,59 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
+
 import time
-import csv
-import xlwt
-from xlwt import Workbook
+#import csv
+#import xlwt
+#from xlwt import Workbook
 
 #MODIFICARI CLOUDSCRAPER
-import cloudscraper
-from selenium.webdriver.common.by import By
+#import cloudscraper
+
+def setDriver():
+
+    options = webdriver.ChromeOptions()
+    #options.add_argument("--headless=new")
+    driver = webdriver.Chrome(options=options)
+    driver.implicitly_wait(5)
+    return driver
+
+def searchSpotify(driver, searchText):
+    driver.get("https://open.spotify.com/")
+    searchBar = driver.find_element(By.XPATH, '//*[@id="global-nav-bar"]/div[2]/div/div/span/div/form/div[2]/input')
+    searchBar.send_keys(searchText)
+    searchBar.send_keys(Keys.ENTER)
+    time.sleep(10)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 """
+
 FUNCTIA INITIALA "PRELUCRARE DATE"
 
 def prelucrareDate(driver, game):
@@ -51,17 +94,20 @@ def prelucrareDate(driver, game):
     driver.back()
 
     return list
-"""
+
 
 def prelucrareDate(driver, game):
-    print(f"Procesare joc: {game}")
+    #print(f"Procesare joc: {game}")
     data_list=[game]
 
     #scraper
-    scraper=cloudscraper.create_scraper(browser='chrome')
-    url=f"https://steamdb.info/app/{game}/charts/"
+    #scraper=cloudscraper.create_scraper(browser='chrome')
+    scraper = cloudscraper.create_scraper()
+    print(scraper.get("https://steamdb.info/app/{game}/charts/").text)
+    time.sleep(10)
+    #url=f"https://steamdb.info/app/{game}/charts/"
 
-    """
+
     response = scraper.get(url)
 
     if response.status_code != 200:
@@ -70,9 +116,6 @@ def prelucrareDate(driver, game):
 
     #cica asta incarca sursa pag in selenium ??
     driver.execute_script("document.body.innerHTML = arguments[0];", response.text)
-
-    """
-
     #try catch
     try:
 
@@ -82,7 +125,7 @@ def prelucrareDate(driver, game):
         if response.status_code != 200:
             raise Exception("Pagina nu poate fi accesata!")
 
-        driver.execute_script("document.body.innerHTML = arguments[0];", response.text)
+        #driver.execute_script("document.body.innerHTML = arguments[0];", response.text)
 
         game_name = driver.find_element(By.XPATH, '//*[@id="main"]/div/div[1]/div/div[1]/div[1]/h1').get_attribute("innerHTML")
         steam_db_rating = driver.find_element(By.XPATH, '//*[@id="charts"]/ul[2]/li[2]/strong').get_attribute("innerHTML")[:-1]
@@ -92,14 +135,16 @@ def prelucrareDate(driver, game):
         peak24 = driver.find_element(By.XPATH, '//*[@id="charts"]/div[4]/div[2]/ul/li[1]/strong').get_attribute("innerHTML")
         peak_all_time = driver.find_element(By.XPATH, '//*[@id="charts"]/div[4]/div[2]/ul/li[3]/strong').get_attribute("innerHTML")
 
-        data_list.extend([game_name, steam_db_rating, positive_reviews, negative_reviews, followers, peak24, peak_all_time])
+        data_list.append([game_name, steam_db_rating, positive_reviews, negative_reviews, followers, peak24, peak_all_time])
 
     except Exception as e:
         print(f"Eroare la pag jocului {game}:{e}")
 
     return data_list
+    
 
 def principal():
+
     options = webdriver.ChromeOptions()
     #options.add_argument("--headless=new")
     driver = webdriver.Chrome(options=options)
@@ -127,13 +172,16 @@ def principal():
     for game in gamesID:
 
         list_final.append(prelucrareDate(driver, game))
-        writer.writerows(prelucrareDate(driver, game))
-        """
+        #writer.writerows(prelucrareDate(driver, game))
+
         list_final.append(prelucrareDate(driver, game))
         sheet1.write(i+1, 1, list_final[i])
         i=i+1
-        """
+
 
     print(list_final)
     #wb.save("xlwt GameData.xlsx")
     f.close()
+
+
+"""
