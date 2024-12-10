@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
-
+import pandas as pd
 import time
 #import csv
 #import xlwt
@@ -61,10 +61,96 @@ def searchSpotify(driver, searchText, playlistCounter):
     time.sleep(10)
     return playlistIDs
 
+def addToDf(track_info, df):
+    #aici pun conditii sa nu se dubleze
+    if track_info[0] in df['ID'].values:
+        df.loc[df['ID'] == track_info['ID'], 'NumarAparitii'] += 1
+    else:
+        df.loc[len(df)] = track_info
 
 
+def getTracks(driver, table, df):
+    index = 2
+    #tot ce am mai jos in while 1
+    try:
+        track = table.find_element(
+            By.XPATH, "./div[@aria-rowindex='" + str(index) + "']"
+        )
+    except:
+        print("\nAll songs have been scanned")
+        #break
+    driver.execute_script("arguments[0].scrollIntoView();", track)
+
+    track_info = []         #columns = ['ID', 'Nume_Cantec', 'Artist', 'NumarAparitii', 'Avalable', 'Plays']
+
+    #trackID
+    trackID =track.find_element(By.XPATH, './div/div[2]/div/a').get_attribute("href")
+    track_info.append(trackID)
+
+    try:
+        track_data = track.find_element(
+            By.CSS_SELECTOR, 'div > div[aria-colindex="2"] > div '
+        )
+        track_name = track_data.find_element(
+            By.CSS_SELECTOR, "a > div"
+        ).get_attribute("innerHTML")
+        track_artist = track_data.find_elements(
+            By.CSS_SELECTOR, "span.standalone-ellipsis-one-line > div > a"
+        )
+        track_avalability = 1
+    except:
+        track_name = "Unavalable song"
+        track_artist = []
+        track_avalability = 0
+
+    #track name
+    track_info.append(track_name)
+
+    output_artists = ""
+    for artist in track_artist:
+        output_artists += artist.get_attribute("innerHTML") + ", "
+        
+    if(len(output_artists)): output_artists = output_artists[:-2]
+
+    #track artists
+    track_info.append(str(output_artists))
+    #track numar de aparitii
+    track_info.append(1)
+    #track avalability
+    track_info.append(track_avalability)
+    #track_plays
+    track_info.append("working")
 
 
+    index = index + 1
+
+    ##add to df
+    addToDf(track_info, df)
+    print(track_info)
+
+
+def scrapePlaylist(driver, playlistName, df):
+    #iau fiecare cantec in parte
+    driver.get("https://open.spotify.com/playlist/" + playlistName)
+    table = driver.find_element(
+        By.XPATH,
+        '//*[@id="main"]/div/div[2]/div[4]/div/div[2]/div[2]/div/main/section/div[2]/div[3]/div/div[1]/div[2]/div[2]',
+    )
+    #//*[@id="main"]/div/div[2]/div[4]/div[1]/div[2]/div[2]/div/main/section/div[2]/div[3]/div/div[1]/div[2]/div[2]
+    getTracks(driver, table, df)
+    time.sleep(10)
+
+    print("im cooked2")
+
+def collectSongs(driver, df, playlistsFound):
+
+    #iau fiecare playlist in parte
+    for playlistInstance in playlistsFound:
+        scrapePlaylist(driver, playlistInstance, df)
+    
+    print("Im cooked")
+
+    return df
 
 
 

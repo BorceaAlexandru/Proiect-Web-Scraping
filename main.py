@@ -9,12 +9,21 @@ if __name__ == "__main__":
     driver = setDriver()
     #Get title
     searchText ="car drive vintage"
-    playlistsFound = []
+    playlistsFound = ['2lXdqHGwllSHFwXnngwBG4']
+    #playlistsFound = ['']
 
     #inainte sa schimb 10le static de aici sa fac implementarea pe care am comentat-o in functie in scraper.py
-    playlistsFound.append(searchSpotify(driver, searchText, 10))
+    #playlistsFound.append(searchSpotify(driver, searchText, 10))
 
-    print(playlistsFound)
+    #trec prin fiecare playlist 
+    songs=[]
+
+    columns = ['ID', 'Nume_Cantec', 'Artist', 'NumarAparitii', 'Avalable', 'Plays']
+    df = pd.DataFrame(songs, columns=columns)
+    df = collectSongs(driver, df, playlistsFound)
+    print(df)
+    df.to_csv('output.csv', index=False) 
+
 """
     principal()
 
