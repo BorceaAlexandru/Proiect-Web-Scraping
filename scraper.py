@@ -65,7 +65,7 @@ def searchSpotify(driver, searchText, playlistCounter):
 def addToDf(track_info, df):
     #aici pun conditii sa nu se dubleze
     if track_info[0] in df['ID'].values:
-        df.loc[df['ID'] == track_info['ID'], 'NumarAparitii'] += 1
+        df.loc[df['ID'] == track_info[0], 'NumarAparitii'] += 1
     else:
         df.loc[len(df)] = track_info
 

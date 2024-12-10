@@ -9,7 +9,7 @@ if __name__ == "__main__":
     driver = setDriver()
     #Get title
     searchText ="car drive vintage"
-    playlistsFound = ['2lXdqHGwllSHFwXnngwBG4']
+    playlistsFound = ['2lXdqHGwllSHFwXnngwBG4', '2xPSpt8gTScUxEgWF2GbUO']
     #playlistsFound = ['']
 
     #inainte sa schimb 10le static de aici sa fac implementarea pe care am comentat-o in functie in scraper.py
