@@ -1,5 +1,6 @@
 import pandas as pd
 from scraper import *
+from logSpotify import *
 
 
 
@@ -9,11 +10,11 @@ if __name__ == "__main__":
     driver = setDriver()
     #Get title
     searchText ="car drive vintage"
-    playlistsFound = ['2lXdqHGwllSHFwXnngwBG4', '2xPSpt8gTScUxEgWF2GbUO']
-    #playlistsFound = ['']
+    #playlistsFound = ['2lXdqHGwllSHFwXnngwBG4', '2xPSpt8gTScUxEgWF2GbUO']
 
     #inainte sa schimb 10le static de aici sa fac implementarea pe care am comentat-o in functie in scraper.py
-    #playlistsFound.append(searchSpotify(driver, searchText, 10))
+    playlistsFound = searchSpotify(driver, searchText, 10)
+    print(playlistsFound)
 
     #trec prin fiecare playlist 
     songs=[]
@@ -22,22 +23,14 @@ if __name__ == "__main__":
     df = pd.DataFrame(songs, columns=columns)
     df = collectSongs(driver, df, playlistsFound)
     print(df)
-    df.to_csv('output.csv', index=False) 
+    df.to_csv('output.csv', index=False)
+    driver.close()
 
-"""
-    principal()
+    #de prelucrat coloana cu scor dupa care sa maiau
 
-    print("Link to playlist: ")
-    link = input()
-    driver.get(link)
+    df = pd.read_csv('output.csv')
+    df = df.sort_values('NumarAparitii', ascending=False).head(30)
+    print(df)
+    finalLink = playlistCreation(df,searchText)
+    print(finalLink)
 
-    resetCSV()
-
-    table = setTable(driver)
-    getTracks(table)
-
-    writeTxtFile(driver, link)
-
-    driver.quit()
-    exit(1)
-"""
