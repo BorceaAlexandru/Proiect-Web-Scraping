@@ -1,1 +1,6 @@
-pip install selenium pandas numpy requests BeautifulSoup lxml
+selenium 
+pandas 
+numpy 
+requests 
+spotipy 
+json
