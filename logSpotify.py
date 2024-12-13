@@ -14,8 +14,8 @@ def playlistCreation(df, name):
     password = driver.find_element(By.XPATH, '//*[@id="login-password"]')
     submit = driver.find_element(By.XPATH, '//*[@id="login-button"]')
 
-    username.send_keys("mikeholera43@gmail.com")
-    password.send_keys("SalutColegi1")
+    username.send_keys("")
+    password.send_keys("")
     time.sleep(1)
     submit.click()
 
