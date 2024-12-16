@@ -5,6 +5,7 @@ from selenium.webdriver.common.keys import Keys
 import pandas as pd
 import time
 from scraper import *
+from credentials import user, password as passkey
 
 def playlistCreation(df, name):
     driver = setDriver()
@@ -14,8 +15,8 @@ def playlistCreation(df, name):
     password = driver.find_element(By.XPATH, '//*[@id="login-password"]')
     submit = driver.find_element(By.XPATH, '//*[@id="login-button"]')
 
-    username.send_keys("")
-    password.send_keys("")
+    username.send_keys(user)
+    password.send_keys(passkey)
     time.sleep(1)
     submit.click()
 

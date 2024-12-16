@@ -4,10 +4,11 @@ from logSpotify import *
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import json
+from credentials import id, id_secret
 
 def APIwork(df, playlistsFound):
-    client_id = ""
-    client_secret = ""
+    client_id = id
+    client_secret = id_secret
     # Authenticate
     sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=client_id, client_secret=client_secret))
 
@@ -46,37 +47,44 @@ def APIwork(df, playlistsFound):
 
 if __name__ == "__main__":
 
-    driver = setDriver()
+    print("---Aplicatie Playlist------------------------------------------")
 
     print("Alege un titlu general pentru playlist: ")
     searchText = input()
-    playlistsFound = searchSpotify(driver, searchText, 10)
 
+    print("---------------------------------------------------------------")
     print("Metoda rapida sau inceata (r/i): ")
+    print("Metoda inceata demonstreaza extragerea informatiei prin webscraping iar metoda rapida prin API-ul pus la dispozitie de Spotify")
     response = input()
 
-    if(response == "i"):
-        songs=[]
+    print("---------------------------------------------------------------")
+    driver = setDriver()
+    playlistsFound = searchSpotify(driver, searchText, 10)
 
-        columns = ['ID', 'Nume_Cantec', 'Artist', 'NumarAparitii', 'Avalable', 'Plays']
-        df = pd.DataFrame(songs, columns=columns)
+    songs=[]
+    columns = ['ID', 'Nume_Cantec', 'Artist', 'NumarAparitii', 'Avalable', 'Popularity']
+    df = pd.DataFrame(songs, columns=columns)
+
+    if(response == "i"):
         df = collectSongs(driver, df, playlistsFound)
         print(df)
+
         df.to_csv('output.csv', index=False)
+        print("Cantece salvate in csv")
         driver.close()
 
         df = pd.read_csv('output.csv')
         df = df.sort_values('NumarAparitii', ascending=False).head(30)
     elif(response == "r"):
         driver.close()
-        songs=[]
-        columns = ['ID', 'Nume_Cantec', 'Artist', 'NumarAparitii', 'Avalable', 'Plays']
-        df = pd.DataFrame(songs, columns=columns)
         APIwork(df, playlistsFound)
-        df = df[df['Plays'] >= 10]
+
+        df = df[df['Popularity'] >= 10]
+
         df.to_csv('output2.csv', index=False)
-        df['Score'] = df['NumarAparitii'] / df['Plays']
-        # df = df.sort_values('Plays', ascending=False).head(30)
+        print("Cantece salvate in csv")
+        df['Score'] = df['NumarAparitii'] / df['Popularity']
+        # df = df.sort_values('Popularity', ascending=False).head(30)
         df = df.sort_values('Score', ascending=False).head(30)
         print(df)
     else:
@@ -84,4 +92,5 @@ if __name__ == "__main__":
         exit(1)
 
     finalLink = playlistCreation(df,searchText)
+    print("Linkul catre playlistul final: ")
     print(finalLink)
